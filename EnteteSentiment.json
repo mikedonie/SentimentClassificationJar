@@ -1,0 +1,142 @@
+{"ranges":
+	[
+	{
+		"name" : "Joie",
+		"from" : 0,
+		"to" : 60,
+		"children" : 
+			[
+				{
+          "name" : "Valorisation",
+          "from" : 0,
+          "to" : 10
+        },
+        {
+          "name" : "Plaisir",
+          "from" : 10,
+          "to" : 20
+        },
+        {
+					"name" : "Appaisement",
+					"from" : 20,
+					"to" : 30
+				},
+				{
+					"name" : "Amour",
+					"from" : 30,
+					"to" : 40			
+				},
+				{
+					"name" : "Satisfaction",
+					"from" : 40,
+					"to" : 50				
+				},
+				{
+					"name" : "Accord",
+					"from" : 50,
+					"to" : 60			
+				}
+			]	
+	},
+	{
+		"name" : "Peur",
+		"from" : 60,
+		"to" : 120,
+		"children" : 
+			[
+				{
+					"name" : "Peur",
+					"from" : 60,
+					"to" : 120
+				}
+			]	
+	},
+	{
+		"name" : "Tristesse",
+		"from" : 120,
+		"to" : 180,
+		"children" : 
+			[
+				{
+					"name" : "Tristesse",
+					"from" : 120,
+					"to" : 150
+				},
+				{
+          "name" : "Deplaisir",
+					"from" : 150,
+					"to" : 180			
+				}
+			]	
+	},
+	{
+		"name" : "Colere",
+		"from" : 180,
+		"to" : 240,
+		"children" : 
+			[
+				{
+					"name" : "Colere",
+					"from" : 180,
+					"to" : 192
+				},
+				{
+					"name" : "Derangement",
+					"from" : 192,
+					"to" : 204			
+				},
+				{
+					"name" : "Insatisfaction",
+					"from" : 204,
+					"to" : 216				
+				},
+				{
+					"name" : "Desaccord",
+					"from" : 216,
+					"to" : 228		
+				},
+        {
+          "name" : "Devalorisation",
+          "from" : 228,
+          "to" : 240    
+        }
+			]	
+	},
+  {
+    "name" : "Surprise",
+    "from" : 240,
+    "to" : 300,
+    "children" : 
+      [
+        {
+          "name" : "Surprise positive",
+          "from" : 240,
+          "to" : 270
+        },
+        {
+          "name" : "Surprise negative",
+          "from" : 270,
+          "to" : 300      
+        }
+      ] 
+  },
+  {
+    "name" : "Degout",
+    "from" : 300,
+    "to" : 360,
+    "children" : 
+      [
+        {
+          "name" : "Mepris",
+          "from" : 300,
+          "to" : 330
+        },
+        {
+          "name" : "Ennui",
+          "from" : 330,
+          "to" : 360     
+        }
+      ] 
+  } 
+],
+"data":

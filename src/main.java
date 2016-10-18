@@ -56,11 +56,11 @@ public class main
     test.setClassIndex(test.numAttributes() - 1);
     */
     System.out.println("Construction objet ConstructionARFF..");
-    ConstructionARFF obj = new ConstructionARFF();
+    ConstructionARFF_Old obj = new ConstructionARFF_Old();
     System.out.println("Construction train ARFF..");
     //train = obj.ConstructionInstances(train);
     System.out.println("Construction test ARFF..");
-    test = obj.ConstructionInstances(test);
+    test = obj.ConstructionInstances(test,"emotion");
    // System.out.println("  Train.numAttributes = " + train.numAttributes());
     System.out.println("  Test.numAttributes = " + test.numAttributes());
     

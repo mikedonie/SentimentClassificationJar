@@ -1,19 +1,4 @@
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.filters.supervised.attribute.AttributeSelection;
-import weka.filters.unsupervised.attribute.StringToWordVector;
-
+import org.apache.commons.cli.*;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -22,171 +7,104 @@ import weka.filters.unsupervised.attribute.StringToWordVector;
 
 /**
  *
- * @author Amine
+ * @author mikedonald
  */
+
 public class Lunch {
-    public static void main(String[] args)
-    throws Exception
-  {  
-      String pathIn = args[0];
-      String pathOut = args[1];
-      
-      BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(pathIn)));
-      String line;
-      
-      FileWriter fw = new FileWriter(pathOut);
-      PrintWriter output = new PrintWriter(new BufferedWriter(fw));
-      
-      CalculAttributs ca = new CalculAttributs();
-      StringToWordVector stw = (StringToWordVector) weka.core.SerializationHelper.read("models//DEFT15_T2.2_STW.model");
-      AttributeSelection ats = (AttributeSelection)weka.core.SerializationHelper.read("models//DEFT15_T2.2_IG.model");
-      Classifier cls = (Classifier) weka.core.SerializationHelper.read("models//DEFT15_T2.2_SMO.model");
-      
-      // Liste des attributs
-        ArrayList<Attribute> atts = new ArrayList(2);
-        
-        // Ajouter le descripteur
-        atts.add(new Attribute("_text",(ArrayList<String>)null));
-        
-        // Construire l'attribut de classe
-        ArrayList<String> classVal = new ArrayList<String>();
+    public static void main(String[] args) throws Exception
+    {
+        Options options = new Options();
 
+        Option work = new Option("w", "work", true, "learn or applied");
+        work.setRequired(true);
+        options.addOption(work);
         
-        // Ajouter l'attribut de classe (nominal)
-        atts.add(new Attribute("_class",classVal));
+        Option inp = new Option("i", "input", true, "input file path");
+        inp.setRequired(false);
+        options.addOption(inp);
+
+        Option outp = new Option("o", "output", true, "output file");
+        outp.setRequired(false);
+        options.addOption(outp);
         
-        // Créer l'objet Instances data ayant comme attributs atts
-        Instances data = new Instances("instance",atts,0);
+        Option topn = new Option("t", "topn", true, "top n classes");
+        topn.setRequired(false);
+        options.addOption(topn);
         
-        // L'instance
-        Instance ins = new DenseInstance(2);
-        ins.setDataset(data);
-        while ((line=r.readLine())!=null){
-            ins.setValue(0, line);
-            data.add(ins);
+        Option model = new Option("m", "model", true, "choix du modèle");
+        model.setRequired(false);
+        options.addOption(model);
+        
+        Option detection = new Option("d", "detection", true, "choix du travail");
+        detection.setRequired(false);
+        options.addOption(detection);
+        
+        Option config = new Option("c", "config", true, "fichier de configuration");
+        config.setRequired(true);
+        options.addOption(config);
+        
+        Option jsonfile = new Option("j", "jsonfile", true, "fichier json");
+        config.setRequired(false);
+        options.addOption(jsonfile);
+        
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utility-name", options);
+            System.exit(1);
+            return;
         }
-        ConstructionARFF obj = new ConstructionARFF(ca);
-        data = obj.ConstructionInstances(data);
-        int id=0;
-        Instance inst;
-        for (Instance in:data){
-            id++;
-            stw.input(in);
-            inst = stw.output();
-            ats.input(inst);
-            inst = ats.output();
+        
+        String pathIn = "";
+        if(cmd.hasOption("output"))
+            pathIn = cmd.getOptionValue("input");  
+        
+        String pathOut = "";
+        if(cmd.hasOption("output"))
+            pathOut = cmd.getOptionValue("output");  
 
-            double classe=cls.classifyInstance(inst);
+        int TN = 1 ;
+        if(cmd.hasOption("topn"))
+            TN = Integer.parseInt(cmd.getOptionValue("topn"));
 
-            output.print(id+"\t");
+        int modele = 18 ;
+        if(cmd.hasOption("model"))
+             modele = Integer.parseInt(cmd.getOptionValue("model"));
 
-            if (classe==0) {
-                output.println("DEPLAISIR ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==1) {
-                output.println("DERANGEMENT ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==2) {
-                output.println("MEPRIS ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==3) {
-                output.println("SURPRISE_NEGATIVE ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==4) {
-                output.println("PEUR ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==5) {
-                output.println("COLERE ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==6) {
-                output.println("ENNUI ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==7) {
-                output.println("TRISTESSE ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==8) {
-                output.println("PLAISIR ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==9) {
-                output.println("APAISEMENT ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==10) {
-                output.println("AMOUR ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==11) {
-                output.println("SURPRISE_POSITIVE ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==12) {
-                output.println("SATISFACTION ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==13) {
-                output.println("INSATISFACTION ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==14) {
-                output.println("ACCORD ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==15) {
-                output.println("VALORISATION ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==16) {
-                output.println("DESACCORD ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==17) {
-                output.println("DEVALORISATION ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else if (classe==18) {
-                output.println("INSTRUCTION ("+cls.distributionForInstance(inst)[(int) classe]+")");
-            }
-            else {
-                output.println("Erreur");
-            }
-            /*if (classe==0) {
-                output.println("POSITIF");
-            }
-            else if (classe==1) {
-                output.println("NEGATIF");
-            }
-            else if (classe==2) {
-                output.println("NEUTRE");
-            }
-            else {
-                output.println("Erreur");
-            }*/
-            output.flush();
-       }
-       output.close();
-      
-  }
-    
-    public static Instances makeInstance(String tweet) {
-
-        // Liste des attributs
-        ArrayList<Attribute> atts = new ArrayList(2);
+        String detect = "";
+        if(cmd.hasOption("detection"))
+            detect = cmd.getOptionValue("detection");
         
-        // Ajouter le descripteur
-        atts.add(new Attribute("_text",(ArrayList<String>)null));
+        String propPath="";
+        if(cmd.hasOption("config"))
+            propPath = cmd.getOptionValue("config");
         
-        // Construire l'attribut de classe
-        ArrayList<String> classVal = new ArrayList<String>();
-        classVal.add("+");
-        classVal.add("-");
-        classVal.add("=");
+        String workM="";
+        if(cmd.hasOption("work"))
+            workM = cmd.getOptionValue("work");
         
-        // Ajouter l'attribut de classe (nominal)
-        atts.add(new Attribute("_class",classVal));
+        String JsonFile = "";
+        if(cmd.hasOption("jsonfile"))
+            JsonFile = cmd.getOptionValue("jsonfile");
         
-        // Créer l'objet Instances data ayant comme attributs atts
-        Instances data = new Instances("instance",atts,0);
-        
-        // L'instance
-        Instance ins = new DenseInstance(2);
-        ins.setDataset(data);
-        
-        // Remplir Instance
-        ins.setValue(0, tweet);
-        data.add(ins);
-        
-        return data;
-  }
-    
+        if (workM.equalsIgnoreCase("applied")){
+            if((pathIn.equalsIgnoreCase("")) || (pathOut.equalsIgnoreCase("")) || (detect.equalsIgnoreCase("")) ){
+                System.out.println("Missing required options: \n" +
+                "usage: utility-name\n" +
+                " -d,--detection <arg>   choix du travail\n" +
+                " -i,--input <arg>       input file path\n" +
+                " -o,--output <arg>      output file");
+                System.exit(1);
+            }
+            AppliedModels.Applied (pathIn, pathOut, JsonFile, propPath, detect, TN) ;
+        }else{
+            LearnModels LM = new LearnModels();
+            LM.learn(propPath) ;
+        }
+    }
 }
