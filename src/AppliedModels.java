@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.TreeMap;
 //import org.json.*;
 import javax.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -42,11 +44,33 @@ import javax.json.*;
  */
 
 public class AppliedModels {
-    public static void Applied (String pathIn, String pathOut, String FichierJson, String path, String detect, int TN) throws Exception
+    public static void Applied (String pathIn, String pathOut, String FichierJsonSimple, String FileJsonEric, String path, int TN) throws Exception
     {
         BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(pathIn)));
-        String line;
-
+        String line, sCurrentLine, StringJson="";
+        ArrayList<String> ArrDatTim =new ArrayList<String>(); 
+        ArrayList<String> ArrMess =new ArrayList<String>();
+        int lengdoc = 0 ;
+        /*while ((sCurrentLine = r.readLine()) != null) {
+            StringJson+=sCurrentLine;
+        }
+        r.close();
+        //System.out.println(StringJson);
+        JSONArray array = new JSONArray(StringJson);
+        for(int i=0; i<array.length(); i++){
+            JSONObject jsonObj  = array.getJSONObject(i);
+            String Message = jsonObj.getString("Message");
+            String DateTime = jsonObj.getString("DateTime");
+            ArrDatTim.add(DateTime);
+            ArrMess.add(Message);
+        }*/
+        while ((sCurrentLine = r.readLine()) != null) {
+            String Message = sCurrentLine;
+            String DateTime = "11/11/2012";
+            ArrDatTim.add(DateTime);
+            ArrMess.add(Message);
+        }
+        
         FileWriter fw = new FileWriter(pathOut);
         PrintWriter output = new PrintWriter(new BufferedWriter(fw));
 
@@ -57,8 +81,6 @@ public class AppliedModels {
 	InputStream input = new FileInputStream(path);
         prop.load(input);
         
-        String dateHeure = "11/11/2000 17:40:48";
-            
         // Liste des attributs
         ArrayList<Attribute> atts = new ArrayList(2);
         // Ajouter le descripteur
@@ -74,24 +96,31 @@ public class AppliedModels {
         // L'instance
         Instance ins = new DenseInstance(2);
         ins.setDataset(data);
-        while ((line=r.readLine())!=null){
-            ins.setValue(0, line);
+        int b = 0;
+        //while ((line=r.readLine())!=null){        
+        while (b < ArrMess.size()){
+            ins.setValue(0, ArrMess.get(b));
             data.add(ins);
+            b++;
         }
         
         int id=0;
         Instance inst;
         
         //Emotions
-        String Emo[] = {"DEPLAISIR", "DERANGEMENT", "MEPRIS", "SURPRISE_NEGATIVE", "PEUR","COLERE","ENNUI","TRISTESSE","PLAISIR","APAISEMENT","AMOUR","SURPRISE_POSITIVE",
+        String Emo2[] = {"DEPLAISIR", "DERANGEMENT", "MEPRIS", "SURPRISE_NEGATIVE", "PEUR","COLERE","ENNUI","TRISTESSE","PLAISIR","APAISEMENT","AMOUR","SURPRISE_POSITIVE",
             "SATISFACTION","INSATISFACTION","ACCORD","VALORISATION","DESACCORD","DEVALORISATION","INSTRUCTION"};
-        int EmoVal[] = {179, 203, 329, 299, 119,191,359,149,19,29,39,269,49,215,59,9,227,239,-1};
+        String Emo1[] = {"INFORMATION", "EMOTION", "SENTIMENT", "OPINION"};
+        String Emo3[] = {"JOIE", "PEUR", "COLERE", "SURPRISE", "DEGOUT", "TRISTESSE"};
+        int EmoVal2[] = {179, 203, 329, 299, 119,191,359,149,19,29,39,269,49,215,59,9,227,239,-1};
+        int EmoVal1[] = {89, 179, 239, 359};
         
         String Pol[] = {"POSITIF", "NEGATIF", "NEUTRE"};
+        int PolInt[] = {119, 239, 359};
         
         JsonArrayBuilder builderJS = Json.createArrayBuilder(); 
         JsonArrayBuilder builderJsonEric = Json.createArrayBuilder(); 
-        
+        Instances dataO = data ;
         data = obj.ConstructionInstances(data);
         for (Instance in:data){
             JsonArrayBuilder BuilderJAB = Json.createArrayBuilder();
@@ -111,7 +140,7 @@ public class AppliedModels {
             int NbC = clsSMO.distributionForInstance(inst).length ;  //Nombre de classe
             int IndP [] = new int[NbC] ;
             int Rank [] = new int[NbC] ;
-                
+            
             double [] DistP = new double [NbC];  //for probabilities dist
                 
             for (int k = 0 ; k < NbC ; k++){
@@ -125,11 +154,17 @@ public class AppliedModels {
             RangeTable(DistP, IndP, Rank);
             //System.out.println("SMO");
             //Affichage (Emo, IndP, DistP, Rank, NbC) ;  System.out.println();
-            if(detect.equalsIgnoreCase("polarity")){
+            if(TN > NbC) TN = NbC ;
+            if (TN  < 1) TN = 1;
+            if(prop.getProperty("tache").equalsIgnoreCase("polarity")){
                 IncrMap(map, DistP, IndP, Pol, TN, NbC);
-            }else if(detect.equalsIgnoreCase("emotion")){
-                IncrMap(map, DistP, IndP, Emo, TN, NbC);
-            }  
+            }else if(prop.getProperty("tache").equalsIgnoreCase("emotion2")){
+                IncrMap(map, DistP, IndP, Emo2, TN, NbC);
+            }else if(prop.getProperty("tache").equalsIgnoreCase("emotion1")){
+                IncrMap(map, DistP, IndP, Emo1, TN, NbC);
+            }else if(prop.getProperty("tache").equalsIgnoreCase("emotion3")){
+                IncrMap(map, DistP, IndP, Emo3, TN, NbC);
+            }     
             //Start with tree
             TreeMap<String, Integer> treemap = new TreeMap<String, Integer>(map);
             Map sortedMap = sortByValues(treemap);
@@ -138,19 +173,36 @@ public class AppliedModels {
             int cpt = 0 ;
             int val = 0 ;
             // Display elements
-            output.print(id+"\t");
+            output.print(id+"\t"+dataO.instance(id-1).stringValue(dataO.attribute("_text")));
             while((i.hasNext()) && (cpt < TN)) {
                 Map.Entry me = (Map.Entry)i.next();
                 //System.out.println(me.getKey() + " : "+me.getValue());
-                output.print(me.getKey() + ":"+me.getValue()+"\t");
+                //output.print(me.getKey() + ":"+me.getValue()+"\t");
+                output.print("\t"+me.getKey() + ":"+new BigDecimal(DistP[(int)me.getValue()-1]).setScale(5, BigDecimal.ROUND_HALF_EVEN)+"\t");
                 //Ajout des infos dans le JSON
                 JsonObjectBuilder buildertmp = Json.createObjectBuilder();
                 buildertmp.add("Class",  me.getKey().toString());
 
                 /***Pour le JSon à enlever apres***/
-                for (int l=0; l<Emo.length; l++){
-                    if(Emo[l].equalsIgnoreCase(me.getKey().toString()))
-                        val = l;
+                if(cpt == 0){
+                    if(prop.getProperty("tache").equalsIgnoreCase("polarity")){
+                        for (int l=0; l<PolInt.length; l++){
+                            if(Pol[l].equalsIgnoreCase(me.getKey().toString())){
+                                val = l;
+                                //System.out.println("Valeur : "+PolInt[val]+"\t"+l);
+                            }
+                        }                
+                    }else if(prop.getProperty("tache").equalsIgnoreCase("emotion2")){
+                        for (int l=0; l<Emo2.length; l++){
+                            if(Emo2[l].equalsIgnoreCase(me.getKey().toString()))
+                                val = l;
+                        }
+                    }else if(prop.getProperty("tache").equalsIgnoreCase("emotion1")){
+                        for (int l=0; l<Emo1.length; l++){
+                            if(Emo1[l].equalsIgnoreCase(me.getKey().toString()))
+                                val = l;
+                        }
+                    }
                 }
                 /*********************************/
                 
@@ -166,10 +218,9 @@ public class AppliedModels {
             builderId.add("classes", JAB);
             JsonObject JsId = builderId.build();
             builderJS.add(JsId);
-                
             
             /*********************************Construire le json pour Eric ********************************************/
-            if(id % 100  == 0){
+            /*if(id % 100  == 0){
                 GregorianCalendar gc = new GregorianCalendar();
                 int year = randBetween(1900, 2010);
                 gc.set(gc.YEAR, year);
@@ -178,10 +229,16 @@ public class AppliedModels {
                 dateHeure = gc.get(gc.DAY_OF_MONTH)+"/"+(gc.get(gc.MONTH) + 1)+"/"+gc.get(gc.YEAR);
                 dateHeure+=" 17:40:48";
                 System.out.println(dateHeure);
-            }
+            }*/
             JsonObjectBuilder builderIdEric = Json.createObjectBuilder();
-            builderIdEric.add("date_time", dateHeure);
-            builderIdEric.add("value", EmoVal[val]);
+            builderIdEric.add("date_time", ArrDatTim.get(id-1));
+            if(prop.getProperty("tache").equalsIgnoreCase("polarity")){
+                builderIdEric.add("value", PolInt[val]);
+            }else if(prop.getProperty("tache").equalsIgnoreCase("emotion2")){
+                builderIdEric.add("value", EmoVal2[val]);
+            }else if(prop.getProperty("tache").equalsIgnoreCase("emotion1")){
+                builderIdEric.add("value", EmoVal1[val]);
+            }
             builderJsonEric.add(builderIdEric);
             /*********************************************Fin********************************************/
             
@@ -194,9 +251,9 @@ public class AppliedModels {
         JsonArray JS = builderJS.build() ;
         
         /**************FICHIER JSON********************/
-        if(!FichierJson.equalsIgnoreCase("")){
+        if(!FichierJsonSimple.equalsIgnoreCase("")){
             try {
-                FileWriter file = new FileWriter(FichierJson);
+                FileWriter file = new FileWriter(FichierJsonSimple);
                 //System.out.println(JS.toString());
 		file.write(JS.toString());
 		file.flush();
@@ -207,20 +264,23 @@ public class AppliedModels {
         }
         /*****************************************************/
             
-            /**********************Sortie Eric*************************
-            BufferedReader br = new BufferedReader(new FileReader("EnteteSentiment.json"));
-            String sCurrentLine;
-            String BeginFile = "";
-            while ((sCurrentLine = br.readLine()) != null) {
-                BeginFile+=sCurrentLine;
+            /**********************Sortie Eric*************************/
+            if(!FileJsonEric.equalsIgnoreCase("")){
+                BufferedReader br = new BufferedReader(new FileReader(prop.getProperty("EnteteFichierJson")));
+                //String sCurrentLine;
+                String BeginFile = "";
+                while ((sCurrentLine = br.readLine()) != null) {
+                    BeginFile+=sCurrentLine;
+                }
+                JsonArray JSEric = builderJsonEric.build() ;
+                String EndFile = JSEric.toString()+"}";
+                String AllFile = BeginFile+EndFile;
+                FileWriter fileEric = new FileWriter(FileJsonEric);
+                fileEric.write(AllFile);
+                fileEric.flush();
+                fileEric.close();
+                br.close();
             }
-            JsonArray JSEric = builderJsonEric.build() ;
-            String EndFile = JSEric.toString()+"\\}";
-            String AllFile = BeginFile+EndFile;
-            FileWriter fileEric = new FileWriter("jsonEric.json");
-            fileEric.write(AllFile);
-            fileEric.flush();
-            fileEric.close();
             /*****************************************************/
             
        output.close();

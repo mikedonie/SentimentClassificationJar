@@ -35,17 +35,21 @@ public class Lunch {
         model.setRequired(false);
         options.addOption(model);
         
-        Option detection = new Option("d", "detection", true, "choix du travail");
+        /*Option detection = new Option("d", "detection", true, "choix du travail");
         detection.setRequired(false);
-        options.addOption(detection);
+        options.addOption(detection);*/
         
         Option config = new Option("c", "config", true, "fichier de configuration");
         config.setRequired(true);
         options.addOption(config);
         
         Option jsonfile = new Option("j", "jsonfile", true, "fichier json");
-        config.setRequired(false);
+        jsonfile.setRequired(false);
         options.addOption(jsonfile);
+        
+        Option jsonfileEric = new Option("k", "jsonfileEric", true, "fichier json format Application Eric");
+        jsonfileEric.setRequired(false);
+        options.addOption(jsonfileEric);
         
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -61,7 +65,7 @@ public class Lunch {
         }
         
         String pathIn = "";
-        if(cmd.hasOption("output"))
+        if(cmd.hasOption("input"))
             pathIn = cmd.getOptionValue("input");  
         
         String pathOut = "";
@@ -76,9 +80,9 @@ public class Lunch {
         if(cmd.hasOption("model"))
              modele = Integer.parseInt(cmd.getOptionValue("model"));
 
-        String detect = "";
+        /*String detect = "";
         if(cmd.hasOption("detection"))
-            detect = cmd.getOptionValue("detection");
+            detect = cmd.getOptionValue("detection"); */
         
         String propPath="";
         if(cmd.hasOption("config"))
@@ -92,8 +96,13 @@ public class Lunch {
         if(cmd.hasOption("jsonfile"))
             JsonFile = cmd.getOptionValue("jsonfile");
         
+         String JsonFileEric = "";
+        if(cmd.hasOption("jsonfileEric"))
+            JsonFileEric = cmd.getOptionValue("jsonfileEric");
+        
+        
         if (workM.equalsIgnoreCase("applied")){
-            if((pathIn.equalsIgnoreCase("")) || (pathOut.equalsIgnoreCase("")) || (detect.equalsIgnoreCase("")) ){
+            if((pathIn.equalsIgnoreCase("")) || (pathOut.equalsIgnoreCase("")) /*|| (detect.equalsIgnoreCase(""))*/ ){
                 System.out.println("Missing required options: \n" +
                 "usage: utility-name\n" +
                 " -d,--detection <arg>   choix du travail\n" +
@@ -101,7 +110,7 @@ public class Lunch {
                 " -o,--output <arg>      output file");
                 System.exit(1);
             }
-            AppliedModels.Applied (pathIn, pathOut, JsonFile, propPath, detect, TN) ;
+            AppliedModels.Applied (pathIn, pathOut, JsonFile, JsonFileEric, propPath/*, detect*/, TN) ;
         }else{
             LearnModels LM = new LearnModels();
             LM.learn(propPath) ;

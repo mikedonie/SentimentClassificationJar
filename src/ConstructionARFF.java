@@ -28,7 +28,7 @@ public class ConstructionARFF {
     
     private final ArrayList<String> POS = new ArrayList<>();
     protected static final int nbClassesFEEL=7;
-    protected static final int nbClassesAffects=45;
+    protected static final int nbClassesAffects=36;//45;
     protected static final int nbClassesDiko=1198;
     private CalculAttributs ca;
     private String propPath;
@@ -77,7 +77,7 @@ public class ConstructionARFF {
         for (int i=0; i<newData.numInstances(); i++){
             tweet = newData.instance(i).stringValue(data.attribute("_text"));
             tweetS = tweet;
-            // Preprocessings1
+            //Preprocessings1
             if (prop.getProperty("Preprocessings.normalizeHyperlinks").equalsIgnoreCase("yes")) tweet = Pretraitements.ReplaceLink(tweet);
             if (prop.getProperty("Preprocessings.normalizeEmails").equalsIgnoreCase("yes")) tweet = Pretraitements.ReplaceMail(tweet);
             if (prop.getProperty("Preprocessings.replacePseudonyms").equalsIgnoreCase("yes")) tweet = Pretraitements.ReplaceUserTag(tweet);
