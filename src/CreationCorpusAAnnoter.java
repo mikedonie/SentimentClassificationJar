@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -23,14 +24,14 @@ public class CreationCorpusAAnnoter {
     
     
   public static void main(String[] args) throws IOException{
-        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream("Impatientes.txt")));
+        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream("ImpatientesSentiAnalysisEmotion.txt")));
         String line, sCurrentLine;
         ArrayList<String> ArrImp =new ArrayList<String>();
         ArrayList<String> ArrFac=new ArrayList<String>();
         ArrayList<String> ArrCan =new ArrayList<String>();
         int nbPostFac = 40, nbPostCan = 200, nbPostImp = 200, PostClas = 60;
         
-        FileWriter fw = new FileWriter("CorpusAAnoter.txt");
+        FileWriter fw = new FileWriter("CorpusAAnoterImpatientes.txt");
         PrintWriter output = new PrintWriter(new BufferedWriter(fw));
         
         HashMap<String, Integer>  map = new HashMap<String, Integer>() ;  
@@ -41,7 +42,7 @@ public class CreationCorpusAAnnoter {
         }
         r.close();
         
-        r = new BufferedReader(new InputStreamReader(new FileInputStream("CancerDuSein.txt")));
+        /*r = new BufferedReader(new InputStreamReader(new FileInputStream("CancerDuSein.txt")));
         while ((sCurrentLine = r.readLine()) != null) {
             String Message = sCurrentLine;
             ArrCan.add(Message);
@@ -53,42 +54,57 @@ public class CreationCorpusAAnnoter {
             String Message = sCurrentLine;
             ArrFac.add(Message);
         }
-        r.close();
+        r.close();*/
         
-        int i  = 0, postImp = 0 ; int cpt = 0 ;
+        int i  = 0, postImp = 0 ; int cpt = 0, cptClas = 0;
         while (i < ArrImp.size()){
-            String [] Case = ArrImp.get(i).split("\t");
+            System.out.println(ArrImp.get(i));
             
-            String FirstEmo = Case[2].split("\t")[0];
-            String FirstProb = Case[2].split("\t")[1]; 
-            String SecondProb = Case[3].split("\t")[1];
-            
-            if ((cpt == 0)&&(FirstProb.equalsIgnoreCase("0.3333"))&&(SecondProb.equalsIgnoreCase("0.2000"))){
-                if(!map.containsKey(FirstEmo)){ 
-                    map.put(FirstEmo, 1);
-                    output.println("LesImpatientes\t"+ArrImp.get(i));
-                }
-                else if (map.get(FirstProb) <= PostClas){
-                    int oldValue = map.get(FirstProb);
-                    map.replace(FirstEmo, oldValue+1);
-                    output.println("LesImpatientes\t"+ArrImp.get(i));
-                }
-            }
-            
-            if ((cpt == 1)&&(FirstProb.equalsIgnoreCase("0.3333"))&&(SecondProb.equalsIgnoreCase("0.2000"))){
-                if(!map.containsKey(FirstEmo)){ 
-                    map.put(FirstEmo, 1);
-                    output.println("LesImpatientes\t"+ArrImp.get(i));
-                }
-                else if (map.get(FirstProb) <= PostClas){
-                    int oldValue = map.get(FirstProb);
-                    map.replace(FirstEmo, oldValue+1);
-                    output.println("LesImpatientes\t"+ArrImp.get(i));
+            StringTokenizer st = new StringTokenizer(ArrImp.get(i),"\t");
+            if(st.countTokens()>=4) {
+                st.nextElement();
+		String phr = st.nextElement().toString();
+                //String [] Case = ArrImp.get(i).split("  ");
+                //System.out.println(Case.length+":"+Case[0]);
+                String FirstClassInfo = st.nextElement().toString();
+                String SecondClassInfo = st.nextElement().toString();
+                //System.out.println("Message: "+FirstClassInfo);
+                
+                String FirstEmo = FirstClassInfo.split(":")[0];
+                String FirstProb = FirstClassInfo.split(":")[1]; 
+                String SecondProb = SecondClassInfo.split(":")[1];
+                
+                System.out.println("Message: "+FirstProb+" and "+SecondProb);
+                
+                if ((cpt == 0)&&(FirstProb.equalsIgnoreCase("0.33333"))&&(SecondProb.equalsIgnoreCase("0.20000"))){
+                    if(!map.containsKey(FirstEmo)){ 
+                        map.put(FirstEmo, 1);
+                        output.println("LesImpatientes\t"+phr);
+                        cptClas++;
+                    }
+                    else if (map.get(FirstEmo) <= PostClas){
+                        int oldValue = map.get(FirstEmo);
+                        map.replace(FirstEmo, oldValue+1);
+                        output.println("LesImpatientes\t"+phr);
+                        cptClas++;
+                    }
+                }else if ((cpt == 1)&&(FirstProb.equalsIgnoreCase("0.33333"))&&(SecondProb.equalsIgnoreCase("0.26667"))){
+                    if(!map.containsKey(FirstEmo)){
+                        map.put(FirstEmo, 1);
+                        output.println("LesImpatientes\t"+phr);
+                        cptClas++;
+                    }
+                    else if (map.get(FirstEmo) <= PostClas){
+                        int oldValue = map.get(FirstEmo);
+                        map.replace(FirstEmo, oldValue+1);
+                        output.println("LesImpatientes\t"+phr);
+                        cptClas++;
+                    }
                 }
             }
             
             i++;
-            if (i == ArrImp.size()){
+            if ((i == ArrImp.size())&&(cptClas<nbPostImp)){
                 cpt++;
                 i = 0 ;
             }
