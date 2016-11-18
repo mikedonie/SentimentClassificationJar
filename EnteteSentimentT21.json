@@ -1,0 +1,54 @@
+{"ranges":
+	[
+	{
+		"name" : "Information",
+		"from" : 0,
+		"to" : 90,
+		"children" : 
+			[
+				{
+          "name" : "Information",
+          "from" : 0,
+          "to" : 90
+        }]	
+	},
+	{
+		"name" : "Emotion",
+		"from" : 90,
+		"to" : 180,
+		"children" : 
+			[
+				{
+					"name" : "Emotion",
+					"from" : 90,
+					"to" : 180
+				}
+			]	
+	},
+	{
+		"name" : "Sentiment",
+		"from" : 180,
+		"to" : 240,
+		"children" : 
+			[
+				{
+					"name" : "Sentiment",
+					"from" : 180,
+					"to" : 240
+				}
+			]	
+	},
+	{
+		"name" : "Opinion",
+		"from" : 240,
+		"to" : 360,
+		"children" : 
+			[
+				{
+					"name" : "Opinion",
+					"from" : 240,
+					"to" : 360
+				}
+			]	
+	}],
+"data":
